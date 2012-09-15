@@ -22,3 +22,6 @@
                                  (return #f)))))
                          (range 0 (length list1)))
                (return #t)))))
+
+(define (last-element list)
+  (list-ref list (- (length list) 1)))

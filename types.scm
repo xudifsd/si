@@ -4,7 +4,10 @@
   (procedure? obj))
 
 (define (constant? obj)
-  (or (string? obj) (number? obj)))
+  (or (string? obj) (number? obj) (boolean? obj)))
+
+(define (variable? obj)
+  (symbol? obj))
 
 (define (is-operator? expression symbol)
   (and (list? expression)
@@ -78,3 +81,19 @@
 
 (define (get-set-value expression)
   (caddr expression))
+
+;; user defined procedure
+(define (make-procedure pars body env)
+  (list 'user-procedure pars body env))
+
+(define (user-procedure? obj)
+  (is-operator? obj 'user-procedure))
+
+(define (get-userp-pars userp)
+  (cadr userp))
+
+(define (get-userp-body userp)
+  (caddr userp))
+
+(define (get-userp-env userp)
+  (cadddr userp))
