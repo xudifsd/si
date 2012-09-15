@@ -1,6 +1,7 @@
 (load "utils.scm")
 (load "env.scm")
 (load "types.scm")
+(load "apply.scm")
 
 (define (si-eval expression env)
   (cond ((constant? expression) expression)
@@ -22,13 +23,15 @@
            (si-eval (get-if-alternative expression) env)))
 
         ((define? expression)
-         (let ((sym (get-define-sym expression))
-               (value (get-define-value expression)))
-           (define-sym! sym value env)))
+         (let ((sym (get-define-sym expression)))
+           (if (define-1-format? expression)
+             (let ((value (si-eval (get-define-value expression) env)))
+               (define-sym! sym value env))
+             (define-sym! sym (si-eval (get-define-value expression) env) env))))
 
         ((set!? expression)
          (let ((sym (get-set-sym expression))
-               (value (get-set-value expression)))
+               (value (si-eval (get-set-value expression) env)))
            (set-sym! sym value env)))
 
         ((quote? expression)
@@ -46,7 +49,15 @@
                                      (si-eval (get-comma-at-text element) env)))
                                    (else
                                      element)))
-                           (get-backquoted-text expression))))))
+                           (get-backquoted-text expression))))
+
+        (else
+          (let ((value (si-eval (operator expression) env)))
+            (if (application? value)
+              (si-apply value (map (lambda (ele)
+                                     (si-eval ele env))
+                                   (get-application-args expression)))
+              (error "Unknow expression " expression))))))
 
 (define (splice-list expression)
   (let ((rtn '()))

@@ -9,9 +9,12 @@
 (define (variable? obj)
   (symbol? obj))
 
+(define (operator expression)
+  (car expression))
+
 (define (is-operator? expression symbol)
   (and (list? expression)
-       (eq? (car expression) symbol)))
+       (eq? (operator expression) symbol)))
 
 (define (quote? expression)
   (is-operator? expression 'quote))
@@ -123,7 +126,7 @@
 
 ;; user defined procedure
 (define (make-procedure pars body env)
-  (list 'user-procedure pars body env))
+  (list 'user-procedure pars (make-sequence body) env))
 
 (define (user-procedure? obj)
   (is-operator? obj 'user-procedure))
@@ -136,3 +139,10 @@
 
 (define (get-userp-env userp)
   (cadddr userp))
+
+(define (application? expression)
+  (or (primitve-procedure? expression)
+      (user-procedure? expression)))
+
+(define (get-application-args expression)
+  (cdr expression))
