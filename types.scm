@@ -13,6 +13,45 @@
   (and (list? expression)
        (eq? (car expression) symbol)))
 
+(define (quote? expression)
+  (is-operator? expression 'quote))
+
+(define (get-quoted-text expression)
+  (cadr expression))
+
+(define (backquote? expression)
+  (is-operator? expression 'quasiquote))
+
+(define (get-backquoted-text expression)
+  (cadr expression))
+
+(define (comma? expression)
+  (is-operator? expression 'unquote))
+
+(define (get-comma-text expression)
+  (cadr expression))
+
+(define (comma-at? expression)
+  (is-operator? expression 'unquote-splicing))
+
+(define (get-comma-at-text expression)
+  (cadr expression))
+
+(define (make-comma-at expression)
+  (append (list 'unquote-splicing) (list expression)))
+
+(define (sequence? expression)
+  (is-operator? expression 'begin))
+
+(define (make-sequence expression)
+  (append (list 'begin)
+          (if (not (list? expression))
+            (list expression)
+            expression)))
+
+(define (get-sequence expression)
+  (cdr expression))
+
 
 ;; lambda
 (define (lambda? expression)
