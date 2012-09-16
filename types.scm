@@ -84,7 +84,9 @@
   (caddr expression))
 
 (define (get-if-alternative expression)
-  (cadddr expression))
+  (if (null? (cdddr expression))
+    '()
+    (cadddr expression)))
 
 
 ;; define
@@ -144,5 +146,44 @@
   (or (primitve-procedure? expression)
       (user-procedure? expression)))
 
-(define (get-application-args expression)
+(define (get-application-args expression) ;; this used by application and macro
   (cdr expression))
+
+
+;; call/cc
+(define (call/cc? expression)
+  (is-operator? expression 'call/cc))
+
+(define (get-call/cc-pro expression)
+  (cadr expression))
+
+
+;; defmacro
+(define (defmacro? expression)
+  (is-operator? expression 'defmacro))
+
+(define (get-defmacro-sym expression)
+  (cadr expression))
+
+(define (get-defmacro-pars expression)
+  (caddr expression))
+
+(define (get-defmacro-body expression)
+  (cdddr expression))
+
+
+;; macro
+(define (macro? expression)
+  (is-operator? expression 'macro))
+
+(define (make-macro pars body env)
+  (list 'macro pars (make-sequence body) env))
+
+(define (get-macro-pars macro)
+  (cadr macro))
+
+(define (get-macro-body macro)
+  (caddr macro))
+
+(define (get-macro-env macro)
+  (cadddr macro))

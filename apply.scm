@@ -11,3 +11,10 @@
            (eval-sequence (get-userp-body procedure) new-env)))
         (else
           (error procedure "is neither primitve nor user defined procedure"))))
+
+(define (macroexpand macro args)
+  (let ((new-env
+         (extend-env (get-macro-pars macro)
+                     args
+                     (get-macro-env macro))))
+    (eval-sequence (get-macro-body macro) new-env)))

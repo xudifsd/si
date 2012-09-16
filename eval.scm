@@ -20,7 +20,10 @@
         ((if? expression)
          (if (si-eval (get-if-condition expression) env)
            (si-eval (get-if-clause expression) env)
-           (si-eval (get-if-alternative expression) env)))
+           (let ((alternative (get-if-alternative expression)))
+             (if (null? alternative)
+               'standard-does-not-specify-return-value
+               (si-eval alternative env)))))
 
         ((define? expression)
          (let ((sym (get-define-sym expression)))
@@ -40,6 +43,19 @@
         ((sequence? expression)
          (eval-sequence expression env))
 
+        ((call/cc? expression)
+         (call/cc (lambda (cur)
+                    (si-apply (si-eval (get-call/cc-pro expression)
+                                       env)
+                              (list cur)))))
+
+        ((defmacro? expression)
+         (define-sym! (get-defmacro-sym expression)
+           (make-macro (get-defmacro-pars expression)
+                       (get-defmacro-body expression)
+                       env) ;; lexical closure for macro, I'm not sure if this is right
+           env))
+
         ((backquote? expression)
          (splice-list (map (lambda (element)
                              (cond ((comma? element)
@@ -53,11 +69,16 @@
 
         (else
           (let ((value (si-eval (operator expression) env)))
-            (if (application? value)
-              (si-apply value (map (lambda (ele)
-                                     (si-eval ele env))
-                                   (get-application-args expression)))
-              (error "Unknow expression " expression))))))
+            (cond ((application? value)
+                   (si-apply value (map (lambda (ele)
+                                          (si-eval ele env))
+                                        (get-application-args expression))))
+
+                  ((macro? value)
+                   (si-eval (macroexpand value (get-application-args expression)) env))
+
+                  (else
+                    (error "Unknow expression " expression)))))))
 
 (define (splice-list expression)
   (let ((rtn '()))
