@@ -12,6 +12,9 @@
     (eq? expect (find-sym-in-all-env sym env))
     (eq? expect (find-sym-in-env sym env))))
 
+(define (test-pro-for-link syms args expect)
+  (same-list? (link syms args) expect))
+
 ;; test find-sym-*
 (set! test-case (add-case (list global-env 'a 1 #t) test-case))
 (set! test-case (add-case (list global-env 'a 1 #f) test-case))
@@ -49,3 +52,14 @@
 (set! test-case (add-case (list global-env 'c 3 #f) test-case))
 (set! test-case (add-case (list global-env 'c 3 #t) test-case))
 (unit-test test-pro-for-find-sym-* test-case)
+
+;; test link
+(set! test-case (init-case))
+(set! test-case (add-case '((x #!rest c) (1 2 3 4 5) ((x . 1) (c 2 3 4 5))) test-case))
+(set! test-case (add-case '((x c) (1 2) ((x . 1) (c . 2))) test-case))
+(set! test-case (add-case '((#!rest c) (1 2) ((c 1 2))) test-case))
+(set! test-case (add-case '(() () ()) test-case))
+(set! test-case (add-case '((#!rest c) (1 2) ((c 1 2))) test-case))
+(set! test-case (add-case '((x . c) (1 2 3) ((x . 1) (c 2 3))) test-case))
+(set! test-case (add-case '((x . c) (1) ((x . 1) (c))) test-case))
+(unit-test test-pro-for-link test-case)

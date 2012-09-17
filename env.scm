@@ -57,15 +57,29 @@
         (set-sym! sym value (get-env-parent env))))))
 
 (define (link a b)
-  ;; a and b must be same length list
+  ;; we now support `a` like (#!rest rest) and (x . rest)
   (let ((rtn '()))
-    (for-each (lambda (i)
-                (set! rtn (cons (cons (list-ref a i)
-                                      (list-ref b i)) rtn)))
-              (range 0 (length a)))
+    (call/cc (lambda (return)
+               (for-each (lambda (i)
+                           (let ((ae (list-ref-rest a i))
+                                 (be (list-ref-rest b i)))
+                             (if (eq? (car ae) '#!rest)
+                               (let ((ae (list-ref-rest a (+ i 1))))
+                                 (set! rtn (cons (cons
+                                                  (car ae)
+                                                  be)
+                                                 rtn))
+                                 (return 'dummy))
+                               (begin
+                                (set! rtn (cons (cons (car ae) (car be)) rtn))
+                                (if (and
+				     (not (pair? (cdr ae)))
+				     (not (null? (cdr ae))));; like (x . rest)
+                                  (begin
+                                   (set! rtn (cons (cons (cdr ae) (list-ref-rest b (+ i 1))) rtn))
+                                   (return 'dummy)))))))
+                         (range 0 (pair-length a)))))
     (reverse rtn)))
 
 (define (extend-env syms values base)
-  (if (not (= (length syms) (length values)))
-    (error "requires " (length syms) " args") ;; FIXME we should consider ... here
-    (cons base (link syms values))))
+  (cons base (link syms values)))
