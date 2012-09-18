@@ -57,15 +57,20 @@
            env))
 
         ((backquote? expression)
-         (splice-list (map (lambda (element)
-                             (cond ((comma? element)
-                                    (si-eval (get-comma-text element) env))
-                                   ((comma-at? element) ;; preprocess comma-at
-                                    (make-comma-at
-                                     (si-eval (get-comma-at-text element) env)))
-                                   (else
-                                     element)))
-                           (get-backquoted-text expression))))
+         (define (unquote lst)
+           (map (lambda (element)
+                  (cond ((null? element) element)
+                        ((comma? element)
+                         (si-eval (get-comma-text element) env))
+                        ((comma-at? element) ;; preprocess comma-at
+                         (make-comma-at
+                          (si-eval (get-comma-at-text element) env)))
+                        ((list? element) ;;nest
+                         (unquote element))
+                        (else
+                          element)))
+                lst))
+         (splice-list (unquote (get-backquoted-text expression))))
 
         (else
           (let ((value (si-eval (operator expression) env)))
@@ -81,18 +86,25 @@
                     (error "Unknow expression " expression)))))))
 
 (define (splice-list expression)
-  (let ((rtn '()))
-    (define (push x)
-      (set! rtn (append (list x) rtn)))
+  (define (splice lst)
+    (let ((rtn '()))
+      (define (push! x)
+        (set! rtn (append rtn (list x))))
 
-    (for-each (lambda (x)
-                (if (comma-at? x)
-                  (for-each (lambda (y)
-                              (push y))
-                            (get-comma-at-text x))
-                  (push x)))
-              expression)
-    (reverse rtn)))
+      (for-each (lambda (x)
+                  (cond ((null? x) (push! x))
+                        ((comma-at? x)
+                         (for-each (lambda (y)
+                                     (push! y))
+                                   (get-comma-at-text x)))
+                        ((list? x)
+                         (push! (splice x)))
+                        (else
+                          (push! x))))
+                lst)
+      rtn))
+
+  (splice expression))
 
 (define (eval-sequence expressions env)
   (last-element
