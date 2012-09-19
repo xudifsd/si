@@ -13,7 +13,7 @@
   (car expression))
 
 (define (is-operator? expression symbol)
-  (and (list? expression)
+  (and (pair? expression)
        (eq? (operator expression) symbol)))
 
 (define (quote? expression)
@@ -48,7 +48,7 @@
 
 (define (make-sequence expression)
   (append (list 'begin)
-          (if (not (list? expression))
+          (if (not (pair? expression))
             (list expression)
             expression)))
 
@@ -62,7 +62,7 @@
 
 (define (get-lambda-pars expression)
   (let ((pars (cadr expression)))
-    (if (not (list? pars))
+    (if (not (pair? pars))
       (error pars "is not a list")
       pars)))
 
@@ -96,13 +96,13 @@
 ;; define has two format (define (pro x) x) and (define r 100)
 (define (get-define-sym expression)
   (let ((rtn (cadr expression)))
-    (if (list? rtn)
+    (if (pair? rtn)
       (car rtn)
       rtn)))
 
 ;; (define (pro x) x)
 (define (define-1-format? expression)
-  (list? (cadr expression)))
+  (pair? (cadr expression)))
 
 ;; (define r 100)
 (define (define-2-format? expression)

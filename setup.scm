@@ -10,8 +10,21 @@
 
 (define-sym! 'procedure? user-space-procedure? global-env)
 
-(define-sym! 'eval si-eval global-env)
+(define-sym! 'eval (lambda (expression . env)
+                     (if (null? env)
+                       (si-eval expression global-env)
+                       (si-eval expression `,@(env))))
+  global-env)
+
 (define-sym! 'apply si-apply global-env)
+
+(define-sym! 'macroexpand
+  (lambda (expression)
+    (let ((value (si-eval (operator expression) global-env)))
+      (if (not (macro? value))
+        (error expression " is not a macro")
+        (macroexpand value (get-application-args expression)))))
+  global-env)
 
 (define (indentity-with-user! sym)
   (define-sym! sym (eval sym) global-env))
@@ -62,6 +75,18 @@
 (indentity-with-user! 'random)
 (indentity-with-user! 'set-car!)
 (indentity-with-user! 'set-cdr!)
+(indentity-with-user! 'string<)
+(indentity-with-user! 'string<=)
+(indentity-with-user! 'string<=?)
+(indentity-with-user! 'string<>)
+(indentity-with-user! 'string<?)
+(indentity-with-user! 'string=)
+(indentity-with-user! 'string=?)
+(indentity-with-user! 'string>)
+(indentity-with-user! 'string>=)
+(indentity-with-user! 'string>=?)
+(indentity-with-user! 'string>?)
+(indentity-with-user! 'string?)
 (indentity-with-user! 'pair?)
 (indentity-with-user! 'print)
 (indentity-with-user! 'atom?)
@@ -71,7 +96,7 @@
 ;; primitive procedures don't recognize user-procedure, so we have to define our own
 (si-eval '(define (for-each pro lst)
            (if (null? lst)
-               'done
+             'done
              (begin
               (pro (car lst))
               (for-each pro (cdr lst)))))
@@ -80,7 +105,7 @@
 (si-eval '(define (map pro lst)
            (define (iter lst acc)
              (if (null? lst)
-                 acc
+               acc
                (iter (cdr lst)
                      (append acc
                              (list (pro (car lst)))))))
@@ -89,9 +114,9 @@
 
 (si-eval '(defmacro cond (#!rest conds)
            (if (null? conds)
-               '()
+             '()
              (if (eq? (caar conds) 'else)
-                 `(begin ,@(cdar conds))
+               `(begin ,@(cdar conds))
                `(if ,(caar conds)
                  (begin ,@(cdar conds))
                  (cond ,@(cdr conds))))))
