@@ -57,6 +57,7 @@
 (indentity-with-user! 'ceiling)
 (indentity-with-user! 'cons)
 (indentity-with-user! 'display)
+(indentity-with-user! 'error)
 (indentity-with-user! 'even?)
 (indentity-with-user! 'floor)
 (indentity-with-user! 'integer?)

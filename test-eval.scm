@@ -63,6 +63,7 @@
 ;; test procedure call
 (set! test-case (add-case '((bbb 10000) 10000) test-case))
 (set! test-case (add-case '(((lambda (x y) (+ x y)) 5 4) 9) test-case))
+(set! test-case (add-case '(((lambda () 5)) 5) test-case))
 ;; test lexical closure
 (set! test-case (add-case '((base100 20) 120) test-case))
 (set! test-case (add-case '((base5 10) 15) test-case))

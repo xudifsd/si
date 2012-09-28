@@ -62,7 +62,8 @@
 
 (define (get-lambda-pars expression)
   (let ((pars (cadr expression)))
-    (if (not (pair? pars))
+    (if (not (or
+              (pair? pars) (null? pars)))
       (error pars "is not a list")
       pars)))
 
