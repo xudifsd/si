@@ -1,7 +1,8 @@
 Introduction
 ==
 
-This will implement a scheme interpreter in two language, one is in scheme itself, and one in C, so this project will have two branchs, `master` for C version and `scheme-version` for scheme version.
+This will implement a scheme interpreter in two language, one is in scheme itself, and one in C.<del>so this project will have two branchs, `master` for C version and `scheme-version` for scheme version.</del> 
+This repo contains only scheme version, I implement C version in other [repo](https://github.com/xudifsd/libsi)
 
 I am doing this project because I want to know the internal structure of interpreter, so that this projcet __won't__ be a product qualited project, but merely a toy, and also I will first implement scheme version, which is much easier to implement, and after I have fully understand the functionality of the interpreter I will start to implement the C version, which involve so much memory manipluation.
 
