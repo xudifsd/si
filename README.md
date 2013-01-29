@@ -19,4 +19,3 @@ Something I will __not__ implement:
 * compiler, so that si will only be a interpreter, __not__ a compiler
 * `define-syntax` like macro system, which I think is much more ugly than defmacro
 * large set of system related call interface like `open` or read/write
-=======
